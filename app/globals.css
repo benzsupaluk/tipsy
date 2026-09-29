@@ -1,0 +1,215 @@
+@import "tailwindcss";
+
+@custom-variant lang-th (&:lang(th));
+@custom-variant short (@media (max-height: 720px));
+
+@theme {
+  --color-ink: #0b0a0c;
+  --color-surface: #161518;
+  --color-raised: #1d1c20;
+  --color-line: rgb(255 255 255 / 0.09);
+  --color-bone: #f4efe6;
+  --color-mute: #8e8a94;
+  --color-amber: #f0b64a;
+  --color-amber-deep: #c98d25;
+  --color-plum: #2b1a33;
+  --color-cream: #f7f2e9;
+  --color-suit-red: #d8323c;
+  --color-safe: #6fd3a8;
+  --color-danger: #ff6b6b;
+
+  --font-display: var(--font-archivo), var(--font-anuphan), ui-sans-serif, sans-serif;
+  --font-sans: var(--font-grotesk), var(--font-anuphan), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-rise: rise 0.45s var(--ease-soft) both;
+  --animate-sheet: sheet 0.35s var(--ease-soft) both;
+  --animate-fade: fade 0.25s ease-out both;
+  --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
+  --animate-pop: pop 0.5s var(--ease-soft) both;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes sheet {
+    from { transform: translateY(100%); }
+    to { transform: none; }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(240 182 74 / 0.6); }
+    50% { box-shadow: 0 0 0 6px rgb(240 182 74 / 0); }
+  }
+  @keyframes pop {
+    0% { opacity: 0; transform: scale(0.94); }
+    60% { opacity: 1; transform: scale(1.02); }
+    100% { transform: none; }
+  }
+}
+
+/* Condensed heavy display type (Archivo width axis). Thai falls back to Anuphan bold. */
+@utility font-condensed {
+  font-family: var(--font-display);
+  font-stretch: 72%;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+/* Small caps-style labels: wide tracking splits Thai vowel/tone marks, so only track Latin. */
+@utility label-caps {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  &:lang(th) {
+    letter-spacing: 0.02em;
+    font-size: 12px;
+  }
+}
+
+@utility panel {
+  background: linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.02));
+  border: 1px solid var(--color-line);
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    font-variant-numeric: lining-nums;
+  }
+  button,
+  a,
+  label,
+  input {
+    touch-action: manipulation;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-amber);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Dim bar lighting: warm red top-left, plum top-right, teal bottom-left. */
+  .glow {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(55% 35% at 0% 0%, rgb(120 28 28 / 0.45), transparent 70%),
+      radial-gradient(55% 35% at 100% 0%, rgb(66 30 92 / 0.45), transparent 70%),
+      radial-gradient(60% 35% at 0% 100%, rgb(18 84 72 / 0.4), transparent 70%),
+      var(--color-ink);
+  }
+
+  /* ---------- Playing card ---------- */
+  .pcard {
+    --w: clamp(92px, min(36vw, calc((100dvh - 480px) * 0.714)), 170px);
+    width: var(--w);
+    aspect-ratio: 5 / 7;
+    perspective: 900px;
+    container-type: inline-size;
+    flex: none;
+  }
+  .pcard--lg { --w: clamp(150px, 46vw, 210px); }
+  .pcard--sm { --w: 64px; }
+
+  .pcard__inner {
+    position: relative;
+    height: 100%;
+    transform-style: preserve-3d;
+    transform: rotateY(180deg);
+    transition: transform 0.6s var(--ease-soft);
+  }
+  .pcard.is-up .pcard__inner { transform: rotateY(0deg); }
+  .pcard.flip-in.is-up .pcard__inner { animation: flip-in 0.65s var(--ease-soft) both; }
+  @keyframes flip-in {
+    from { transform: rotateY(180deg) translateY(-8px); }
+    to { transform: rotateY(0deg); }
+  }
+
+  .pcard__side {
+    position: absolute;
+    inset: 0;
+    border-radius: 7cqw;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+  }
+  .pcard__back {
+    transform: rotateY(180deg);
+    border: 1px solid rgb(240 182 74 / 0.45);
+    background:
+      repeating-linear-gradient(135deg, rgb(255 255 255 / 0.05) 0 5cqw, transparent 5cqw 10cqw),
+      linear-gradient(160deg, #3a2242, #1e1224);
+    display: grid;
+    place-items: center;
+    color: var(--color-amber);
+  }
+  .pcard__q {
+    display: grid;
+    place-items: center;
+    width: 32cqw;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid rgb(240 182 74 / 0.6);
+    font-size: 15cqw;
+    line-height: 1;
+  }
+
+  .pcard__face {
+    color: #141316;
+    background: linear-gradient(160deg, #ffffff 0%, var(--color-cream) 55%, #e9e2d5 100%);
+    box-shadow: 0 20px 40px -18px rgb(0 0 0 / 0.9);
+  }
+  .pcard__face.is-red { color: var(--color-suit-red); }
+
+  .pcard__corner {
+    position: absolute;
+    top: 6cqw;
+    left: 8cqw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: var(--font-grotesk), sans-serif;
+    font-weight: 700;
+    font-size: 17cqw;
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+  .pcard__corner i { font-style: normal; font-size: 12cqw; letter-spacing: 0; }
+  .pcard__corner--br {
+    top: auto;
+    left: auto;
+    bottom: 6cqw;
+    right: 8cqw;
+    transform: rotate(180deg);
+  }
+  .pcard__center {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 34cqw;
+    line-height: 1;
+  }
+  .pcard--sm .pcard__corner--br { display: none; }
+}
