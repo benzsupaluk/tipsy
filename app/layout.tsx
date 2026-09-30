@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import { Anuphan, Archivo, Space_Grotesk } from "next/font/google";
 import { AppProvider } from "@/lib/store";
 import { DEFAULT_LANG, isLang, LANG_COOKIE } from "@/lib/i18n";
+import { OG_IMAGE, SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/seo";
 import "./globals.css";
 
 const display = Archivo({
@@ -28,13 +30,39 @@ const thai = Anuphan({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Tipsy · เกมวงเหล้า",
-    template: "%s · Tipsy",
+    default: SITE_TITLE,
+    template: `%s | ${SITE_NAME}`,
   },
-  description: "เกมวงเหล้าในมือถือ: Ladder, Call the Suit, Doraemon · Drinking card games for the table.",
-  applicationName: "Tipsy",
-  appleWebApp: { capable: true, title: "Tipsy", statusBarStyle: "black-translucent" },
+  description: SITE_DESCRIPTION,
+  keywords: SITE_KEYWORDS,
+  applicationName: SITE_NAME,
+  category: "games",
+  alternates: { canonical: "/" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    locale: "th_TH",
+    alternateLocale: ["en_US"],
+    url: "/",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: [OG_IMAGE.url],
+  },
+  formatDetection: { telephone: false },
+  appleWebApp: { capable: true, title: SITE_NAME, statusBarStyle: "black-translucent" },
 };
 
 export const viewport: Viewport = {
@@ -55,6 +83,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <div className="glow" aria-hidden="true" />
         <AppProvider initialLang={lang}>{children}</AppProvider>
       </body>
+      <GoogleAnalytics gaId="G-HY9DKYG187" />
     </html>
   );
 }

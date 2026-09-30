@@ -1,5 +1,6 @@
 "use client";
 
+import { ArrowRightIcon } from "lucide-react";
 import { useApp } from "@/lib/store";
 import { Button } from "../ui";
 
@@ -28,7 +29,10 @@ export function PassStep({
     <div className="flex flex-col gap-3">
       {outcome}
       {deckEmpty ? <p className="text-center text-sm text-amber/90">{t.deckDone}</p> : null}
-      <Button onClick={onNext}>{t.passTo(nextName)} →</Button>
+      <Button onClick={onNext} className="min-h-17 text-xl">
+        {t.passTo(nextName)}
+        <ArrowRightIcon className="size-5" aria-hidden="true" />
+      </Button>
     </div>
   );
 }

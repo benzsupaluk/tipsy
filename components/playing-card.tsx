@@ -6,7 +6,8 @@ import { useApp } from "@/lib/store";
 type Props = {
   card: Card | null;
   faceUp: boolean;
-  size?: "sm" | "md" | "lg";
+  /** `fill` sizes the card to the nearest `container-type: size` ancestor. */
+  size?: "sm" | "md" | "lg" | "fill";
   /** Play the flip when the card mounts already face up. */
   flipIn?: boolean;
   className?: string;

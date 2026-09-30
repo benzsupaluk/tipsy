@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 @custom-variant lang-th (&:lang(th));
 @custom-variant short (@media (max-height: 720px));
@@ -28,6 +30,9 @@
   --animate-fade: fade 0.25s ease-out both;
   --animate-pulse-dot: pulse-dot 2.4s ease-in-out infinite;
   --animate-pop: pop 0.5s var(--ease-soft) both;
+  --animate-boom: boom 0.6s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  --animate-shockwave: shockwave 0.7s ease-out both;
+  --animate-fuse: fuse 1.6s ease-in-out 0.6s infinite;
 
   @keyframes rise {
     from { opacity: 0; transform: translateY(12px); }
@@ -49,6 +54,26 @@
     0% { opacity: 0; transform: scale(0.94); }
     60% { opacity: 1; transform: scale(1.02); }
     100% { transform: none; }
+  }
+  /* Losing banner: blows up, flashes white-hot, then shakes itself out. */
+  @keyframes boom {
+    0% { opacity: 0; transform: scale(0.6); filter: brightness(3); }
+    18% { opacity: 1; transform: scale(1.08); filter: brightness(2); }
+    30% { transform: scale(0.98) translateX(-6px) rotate(-1deg); filter: brightness(1.2); }
+    42% { transform: translateX(5px) rotate(1deg); }
+    54% { transform: translateX(-4px); }
+    66% { transform: translateX(3px); }
+    78% { transform: translateX(-1px); }
+    100% { transform: none; filter: none; }
+  }
+  @keyframes shockwave {
+    from { opacity: 0.9; transform: scale(0.85); }
+    to { opacity: 0; transform: scale(1.35, 1.9); }
+  }
+  /* Lingering heat after the blast. */
+  @keyframes fuse {
+    0%, 100% { box-shadow: 0 0 18px 0 rgb(255 59 48 / 0.35), inset 0 0 24px rgb(255 59 48 / 0.18); }
+    50% { box-shadow: 0 0 32px 4px rgb(255 59 48 / 0.55), inset 0 0 32px rgb(255 59 48 / 0.3); }
   }
 }
 
@@ -104,6 +129,12 @@
       transition-duration: 0.01ms !important;
     }
   }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 @layer components {
@@ -116,7 +147,7 @@
     background:
       radial-gradient(55% 35% at 0% 0%, rgb(120 28 28 / 0.45), transparent 70%),
       radial-gradient(55% 35% at 100% 0%, rgb(66 30 92 / 0.45), transparent 70%),
-      radial-gradient(60% 35% at 0% 100%, rgb(18 84 72 / 0.4), transparent 70%),
+      radial-gradient(60% 35% at 0% 100%, rgb(2 123 249 / 0.4), transparent 70%),
       var(--color-ink);
   }
 
@@ -131,6 +162,8 @@
   }
   .pcard--lg { --w: clamp(150px, 46vw, 210px); }
   .pcard--sm { --w: 64px; }
+  /* Fills the nearest size container (see `container-type: size` on the parent). */
+  .pcard--fill { --w: clamp(140px, min(100cqw, 100cqh * 5 / 7), 360px); }
 
   .pcard__inner {
     position: relative;
@@ -212,4 +245,59 @@
     line-height: 1;
   }
   .pcard--sm .pcard__corner--br { display: none; }
+}
+
+/* ---------- shadcn/ui tokens ----------
+   Components in components/ui/* read these. Mapped onto the Tipsy palette
+   (single dark theme), so shadcn primitives match the rest of the app. */
+@theme inline {
+  --font-heading: var(--font-display);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+:root {
+  color-scheme: dark;
+  --background: var(--color-ink);
+  --foreground: var(--color-bone);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-bone);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-bone);
+  --primary: var(--color-amber);
+  --primary-foreground: var(--color-ink);
+  --secondary: var(--color-raised);
+  --secondary-foreground: var(--color-bone);
+  --muted: rgb(255 255 255 / 0.08);
+  --muted-foreground: var(--color-mute);
+  --accent: rgb(255 255 255 / 0.06);
+  --accent-foreground: var(--color-bone);
+  --destructive: var(--color-danger);
+  --border: var(--color-line);
+  --input: rgb(255 255 255 / 0.15);
+  --ring: var(--color-amber);
+  --radius: 1rem;
 }

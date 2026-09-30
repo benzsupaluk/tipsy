@@ -1,10 +1,7 @@
-import type { Metadata } from "next";
 import { LadderGame } from "@/components/games/ladder";
+import { playMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Ladder",
-  description: "ทายไพ่ สูง ต่ำ หรือเท่ากัน · Guess higher, lower or equal.",
-};
+export const metadata = playMetadata("ladder");
 
 export default function LadderPage() {
   return <LadderGame />;

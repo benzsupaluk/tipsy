@@ -1,10 +1,7 @@
-import type { Metadata } from "next";
 import { CallTheSuitGame } from "@/components/games/call-the-suit";
+import { playMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Call the Suit",
-  description: "ทายดอกไพ่ใบถัดไป · Call the suit of the next card.",
-};
+export const metadata = playMetadata("suit");
 
 export default function SuitPage() {
   return <CallTheSuitGame />;

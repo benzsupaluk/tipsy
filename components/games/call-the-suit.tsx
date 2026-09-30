@@ -10,39 +10,46 @@ import { PlayingCard } from "../playing-card";
 import { CardPair, PassStep, Question } from "./shared";
 
 export function CallTheSuitGame() {
-  const { t, order } = useApp();
-  const turns = useTurns(order);
+  const { t, order, orderIcons } = useApp();
+  const turns = useTurns(order, orderIcons);
   const game = usePredictionDeck<Suit>();
   const { drawn, choice } = game;
 
   const revealed = drawn ? `${t.suits[drawn.suit]} ${SUIT_SYMBOL[drawn.suit]}` : "";
 
+  const passNext = () => {
+    game.next();
+    turns.advance();
+  };
+
   return (
     <GameShell
+      gameId="suit"
       gameName={t.games.suit.name}
       round={turns.round}
       current={turns.current}
+      currentIcon={turns.currentIcon}
       next={turns.next}
-      cardsLeft={game.cardsLeft}
+      nextIcon={turns.nextIcon}
       rules={<RuleList items={t.suit.rules} />}
+      onPassNext={drawn && choice ? passNext : undefined}
       actions={
         drawn && choice ? (
           <PassStep
             outcome={
               <OutcomeBanner
+                player={turns.current}
+                icon={turns.currentIcon}
                 outcome={
                   suitResult(drawn, choice) === "win"
                     ? { tone: "safe", text: t.suit.correct, detail: t.suit.itWas(revealed) }
-                    : { tone: "drink", text: t.suit.wrong(turns.current), detail: `${SUIT_SYMBOL[choice]} → ${t.suit.itWas(revealed)}` }
+                    : { tone: "drink", text: t.suit.wrong, detail: `${SUIT_SYMBOL[choice]} → ${t.suit.itWas(revealed)}` }
                 }
               />
             }
             deckEmpty={game.deckEmpty}
             nextName={turns.next}
-            onNext={() => {
-              game.next();
-              turns.advance();
-            }}
+            onNext={passNext}
           />
         ) : (
           <div className="animate-rise">
@@ -56,7 +63,7 @@ export function CallTheSuitGame() {
                     game.guess(s);
                     buzz(15);
                   }}
-                  className="panel flex min-h-20 short:min-h-16 flex-col items-center justify-center gap-1 rounded-2xl transition hover:border-amber/50 active:scale-[0.97] active:border-amber"
+                  className="flex min-h-20 flex-col items-center justify-center gap-1 rounded-2xl transition panel hover:border-amber/50 active:scale-[0.97] active:border-amber short:min-h-16"
                 >
                   <span className={`text-3xl leading-none ${isRed(s) ? "text-suit-red" : "text-bone"}`} aria-hidden="true">
                     {SUIT_SYMBOL[s]}

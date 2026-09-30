@@ -2,22 +2,39 @@
 
 import { createContext, use, useState, useSyncExternalStore } from "react";
 import { shuffle } from "./cards";
+import { CHARACTERS, pickCharacter } from "./characters";
 import { dict, LANG_COOKIE, type Dict, type Lang } from "./i18n";
 
 const STORAGE_KEY = "tipsy:players:v1";
 
 export type Players = {
   names: string[];
+  /** Character id per player, parallel to `names`. */
+  icons: string[];
   randomize: boolean;
   /** Final play order used by the games. */
   order: string[];
+  /** Character id per player, parallel to `order`. */
+  orderIcons: string[];
 };
 
 const DEFAULT_PLAYERS: Players = {
   names: ["", "", "", ""],
+  icons: CHARACTERS.slice(0, 4),
   randomize: false,
   order: [],
+  orderIcons: [],
 };
+
+/** Give every player a character, e.g. for data saved before icons existed. */
+function withIcons(p: Players): Players {
+  if (p.icons.length === p.names.length && p.orderIcons.length === p.order.length) return p;
+  const icons = p.names.map((_, i) => p.icons[i] ?? "");
+  icons.forEach((icon, i) => {
+    if (!icon) icons[i] = pickCharacter(icons);
+  });
+  return { ...p, icons, orderIcons: p.order.map((_, i) => p.orderIcons[i] ?? pickCharacter([])) };
+}
 
 /* ---- localStorage-backed external store ---- */
 
@@ -28,7 +45,7 @@ function readPlayers(): Players {
   if (cache) return cache;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    cache = raw ? { ...DEFAULT_PLAYERS, ...(JSON.parse(raw) as Partial<Players>) } : DEFAULT_PLAYERS;
+    cache = raw ? withIcons({ ...DEFAULT_PLAYERS, ...(JSON.parse(raw) as Partial<Players>) }) : DEFAULT_PLAYERS;
   } catch {
     cache = DEFAULT_PLAYERS;
   }
@@ -69,10 +86,12 @@ type AppContext = Players & {
   hydrated: boolean;
   t: Dict;
   setLang: (lang: Lang) => void;
-  setNames: (names: string[]) => void;
+  setName: (index: number, name: string) => void;
+  setIcon: (index: number, icon: string) => void;
+  addPlayer: () => void;
+  removePlayer: (index: number) => void;
   setRandomize: (value: boolean) => void;
   startSession: () => void;
-  reshuffleOrder: () => void;
 };
 
 const Ctx = createContext<AppContext | null>(null);
@@ -97,14 +116,25 @@ export function AppProvider({ initialLang, children }: { initialLang: Lang; chil
       document.documentElement.lang = next;
       document.cookie = `${LANG_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
     },
-    setNames: (names) => writePlayers((p) => ({ ...p, names })),
+    setName: (index, name) => writePlayers((p) => ({ ...p, names: p.names.map((n, i) => (i === index ? name : n)) })),
+    setIcon: (index, icon) => writePlayers((p) => ({ ...p, icons: p.icons.map((c, i) => (i === index ? icon : c)) })),
+    addPlayer: () => writePlayers((p) => ({ ...p, names: [...p.names, ""], icons: [...p.icons, pickCharacter(p.icons)] })),
+    removePlayer: (index) =>
+      writePlayers((p) => ({
+        ...p,
+        names: p.names.filter((_, i) => i !== index),
+        icons: p.icons.filter((_, i) => i !== index),
+      })),
     setRandomize: (randomize) => writePlayers((p) => ({ ...p, randomize })),
     startSession: () =>
       writePlayers((p) => {
         const resolved = resolveNames(p.names, t);
-        return { ...p, order: p.randomize ? shuffle(resolved) : resolved };
+        // Seat only players who typed a name; if fewer than two did, keep everyone with default names.
+        const named = p.names.flatMap((n, i) => (n.trim() ? [i] : []));
+        const seats = named.length >= 2 ? named : resolved.map((_, i) => i);
+        const order = p.randomize ? shuffle(seats) : seats;
+        return { ...p, order: order.map((i) => resolved[i]), orderIcons: order.map((i) => p.icons[i]) };
       }),
-    reshuffleOrder: () => writePlayers((p) => ({ ...p, order: shuffle(p.order) })),
   };
 
   return <Ctx value={value}>{children}</Ctx>;
@@ -117,7 +147,7 @@ export function useApp(): AppContext {
 }
 
 /** Rotating turn pointer over the play order. */
-export function useTurns(order: string[]) {
+export function useTurns(order: string[], icons: string[] = []) {
   const [turn, setTurn] = useState(0);
   const n = Math.max(order.length, 1);
   const index = turn % n;
@@ -126,8 +156,10 @@ export function useTurns(order: string[]) {
     round: turn + 1,
     index,
     current: order[index] ?? "",
+    currentIcon: icons[index] ?? "",
     /** Next in play order, i.e. the player on the left. */
     next: order[(index + 1) % n] ?? "",
+    nextIcon: icons[(index + 1) % n] ?? "",
     /** Previous in play order, i.e. the player on the right. */
     prev: order[(index - 1 + n) % n] ?? "",
     advance: () => setTurn((x) => x + 1),
