@@ -13,7 +13,7 @@ export type GameId = "ladder" | "suit" | "doraemon";
 
 const th = {
   brandTag: "เกมวงเหล้า",
-  heroLine: "สับ ทาย ดื่ม มือถือเครื่องเดียวเวียนรอบวง แล้วให้ไพ่ตัดสินว่าใครดื่ม",
+  heroLine: "รวมเกมไพ่ออนไลน์ สำหรับคนรักการดื่มน้ำเมาอย่างเราๆ 🍻",
   playerN: (n: number) => `ผู้เล่น ${n}`,
   whoPlaying: "ใครเล่นบ้าง?",
   whoHint: "ส่งมือถือต่อไปทางซ้าย · 2 คนขึ้นไป",
@@ -172,7 +172,7 @@ export type Dict = typeof th;
 
 const en: Dict = {
   brandTag: "Drinking games",
-  heroLine: "Shuffle, guess, sip. One phone goes round the table and the deck decides who drinks.",
+  heroLine: "Online card games for folks who love a good drink, just like us 🍻",
   playerN: (n) => `Player ${n}`,
   whoPlaying: "Who's playing?",
   whoHint: "Phone passes left. Two or more.",
