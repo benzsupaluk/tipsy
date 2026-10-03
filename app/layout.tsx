@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
+import Script from "next/script";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Anuphan, Archivo, Space_Grotesk } from "next/font/google";
 import { AppProvider } from "@/lib/store";
@@ -84,6 +85,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
         <AppProvider initialLang={lang}>{children}</AppProvider>
       </body>
       <GoogleAnalytics gaId="G-HY9DKYG187" />
+      <Script id="microsoft-clarity" strategy="afterInteractive">
+        {`(function(c,l,a,r,i,t,y){
+          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "yrxufinkmz");`}
+      </Script>
     </html>
   );
 }
